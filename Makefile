@@ -1,14 +1,22 @@
-default:
-	zig build-exe main.zig
+rdebug: debug
+	bin/debug
 
-fast:
-	zig build-exe main.zig -O ReleaseFast
+debug: prebuild
+	cd bin && zig build-exe -O Debug ../src/main.zig && mv main debug
 
-windows:
-	zig build-exe main.zig -target x86_64-windows -O ReleaseFast
+release: linux windows
+
+linux: prebuild
+	cd bin && zig build-exe --strip -O ReleaseFast ../src/main.zig && mv main linux
+
+windows: prebuild
+	cd bin && zig build-exe --strip -O ReleaseFast -target x86_64-windows ../src/main.zig && mv main.exe windows.exe
 
 test:
-	zig test main.zig
+	zig test src/config.zig
+
+prebuild:
+	mkdir -p bin
 
 clean:
-	rm -rf zig-cache main main.exe main.pdb
+	rm -rf src/zig-cache bin
