@@ -1,6 +1,6 @@
-const stdin = @import("std").io.getStdIn().reader();
-const parseInt = @import("std").fmt.parseInt;
-const Allocator = @import("std").mem.Allocator;
+const std = @import("std");
+const stdin = std.io.getStdIn().reader();
+const parseInt = std.fmt.parseInt;
 var buf: [1024]u8 = undefined;
 
 /// Read bool in one line
@@ -17,7 +17,7 @@ pub fn readInt(comptime T: type) !T {
 
 /// Read slice of integers from one line
 /// Integers must be separated by one space
-pub fn readSlice(comptime T: type, allocator: Allocator) ![]T {
+pub fn readSlice(comptime T: type, allocator: std.mem.Allocator) ![]T {
     const n = try readInt(usize);
     const slice = try stdin.readUntilDelimiter(buf[0..], '\n');
     var data = try allocator.alloc(T, n);
