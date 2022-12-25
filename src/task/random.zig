@@ -17,10 +17,10 @@ inline fn lgc(seed: *i64, data: []i64) void {
 
 /// Program interface for LCG
 pub fn rand(allocator: std.mem.Allocator, out: bool) !void {
-    log("Enter seed: ", .{});
+    log("enter seed", .{});
     var seed = try readInt(i64);
 
-    log("Enter n: ", .{});
+    log("enter n", .{});
     const n = try readInt(usize);
 
     var data = try allocator.alloc(i64, n);

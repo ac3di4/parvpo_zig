@@ -1,4 +1,8 @@
 const std = @import("std");
+const readBool = @import("read").readBool;
+const TaskId = @import("read").TaskId;
+const log = std.log.debug;
+
 const rand = @import("task/random.zig").rand;
 
 pub fn main() !void {
@@ -6,5 +10,13 @@ pub fn main() !void {
     defer arena.deinit();
     const allocator = arena.allocator();
 
-    try rand(allocator, true);
+    log("enter task id", .{});
+    const tid = try TaskId.read();
+
+    log("enter output flag", .{});
+    const out = try readBool();
+
+    try switch (tid) {
+        .random => rand(allocator, out),
+    };
 }

@@ -3,10 +3,23 @@ const stdin = std.io.getStdIn().reader();
 const parseInt = std.fmt.parseInt;
 var buf: [1024]u8 = undefined;
 
+/// All possible tasks
+pub const TaskId = enum {
+    random,
+
+    pub fn read() !TaskId {
+        const line = try stdin.readUntilDelimiter(buf[0..], '\n');
+        return switch (line[0]) {
+            '0' => .random,
+            else => error.TaskIdReadError,
+        };
+    }
+};
+
 /// Read bool in one line
 /// First non-zero symbol - true
 pub fn readBool() !bool {
-    const line = try stdin.readUntilDelimiter(buf[0..], '\n', 10);
+    const line = try stdin.readUntilDelimiter(buf[0..], '\n');
     return line[0] != '0';
 }
 
