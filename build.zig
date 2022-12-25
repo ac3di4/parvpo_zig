@@ -7,13 +7,13 @@ pub fn build(b: *std.build.Builder) void {
         .name = "read",
         .path = .{ .path = "src/read.zig" },
     });
-    
+
     const debug_step = b.step("debug", "Compile debug build");
     debug_step.dependOn(&debug.step);
 
     const run_step = b.step("run", "Run debug build");
     run_step.dependOn(&debug.run().step);
-    
+
     const linux = b.addExecutable("linux", "src/main.zig");
     linux.setBuildMode(.ReleaseFast);
     linux.setOutputDir("build");
@@ -36,7 +36,7 @@ pub fn build(b: *std.build.Builder) void {
     const windows_step = b.step("windows", "Compile windows release build");
     windows_step.dependOn(&windows.step);
 
-    const test_random = b.addTest("src/prog/random.zig");
+    const test_random = b.addTest("src/task/random.zig");
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&test_random.step);
