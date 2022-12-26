@@ -3,7 +3,8 @@ const readBool = @import("read").readBool;
 const TaskId = @import("read").TaskId;
 const log = std.log.debug;
 
-const rand = @import("task/random.zig").rand;
+const random = @import("task/random.zig");
+const findmax = @import("task/findmax.zig");
 
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -17,6 +18,7 @@ pub fn main() !void {
     const out = try readBool();
 
     try switch (tid) {
-        .random => rand(allocator, out),
+        .random => random.run(allocator, out),
+        .findmax => findmax.run(allocator, out),
     };
 }

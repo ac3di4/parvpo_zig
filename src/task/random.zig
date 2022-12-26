@@ -3,27 +3,36 @@ const readInt = @import("read").readInt;
 const log = std.log.debug;
 
 /// LCG constants
-const m = 2147483648;
-const a = 1103515245;
-const c = 12345;
+const m: u64 = 2147483648;
+const a: u64 = 1103515245;
+const c: u64 = 12345;
 
 /// Linear congruential generator (LGC)
-inline fn lgc(seed: *i64, data: []i64) void {
+/// Written for u32
+inline fn lgc(seed: *u32, data: []u32) void {
     for (data) |*item| {
-        item.* = @mod(a * seed.* + c, m);
+        item.* = @intCast(u32, (a * seed.* + c) % m);
         seed.* = item.*;
     }
 }
 
+/// Generate random slice (for other tasks)
+pub fn randSlice(allocator: std.mem.Allocator, seed: u32, n: usize) ![]u32 {
+    var data = try allocator.alloc(u32, n);
+    var seed_ = seed;
+    lgc(&seed_, data);
+    return data;
+}
+
 /// Program interface for LCG
-pub fn rand(allocator: std.mem.Allocator, out: bool) !void {
+pub fn run(allocator: std.mem.Allocator, out: bool) !void {
     log("enter seed", .{});
-    var seed = try readInt(i64);
+    var seed = try readInt(u32);
 
     log("enter n", .{});
     const n = try readInt(usize);
 
-    var data = try allocator.alloc(i64, n);
+    var data = try allocator.alloc(u32, n);
 
     var timer = try std.time.Timer.start();
     lgc(&seed, data);
@@ -36,13 +45,13 @@ pub fn rand(allocator: std.mem.Allocator, out: bool) !void {
 
 test "random" {
     const allocator = std.testing.allocator;
-    var data = try allocator.alloc(i64, 10);
+    var data = try allocator.alloc(u32, 10);
     defer allocator.free(data);
 
-    var seed: i64 = 7;
+    var seed: u32 = 7;
     lgc(&seed, data);
 
-    const precalc = [_]i64{ 1282168116, 642666333, 712265938, 1486001571, 2131988640, 220562521, 2099423262, 2083449087, 523310796, 715197717 };
+    const precalc = [_]u32{ 1282168116, 642666333, 712265938, 1486001571, 2131988640, 220562521, 2099423262, 2083449087, 523310796, 715197717 };
     for (precalc) |val, i| {
         try std.testing.expectEqual(val, data[i]);
     }
