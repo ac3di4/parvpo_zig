@@ -7,13 +7,20 @@ var buf: [1024]u8 = undefined;
 pub const TaskId = enum {
     random,
     findmax,
+    sortarr,
 
     pub fn read() !TaskId {
         const line = try stdin.readUntilDelimiter(buf[0..], '\n');
         return switch (line[0]) {
-            '0' => .random,
-            '1' => .findmax,
-            else => error.TaskIdReadError,
+            '0' => TaskId.random,
+            '1' => {
+                return switch (line[2]) {
+                    '1' => TaskId.findmax,
+                    '2' => TaskId.sortarr,
+                    else => error.ReadTaskIdError,
+                };
+            },
+            else => error.ReadTaskIdError
         };
     }
 };

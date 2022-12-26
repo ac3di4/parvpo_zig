@@ -38,8 +38,10 @@ pub fn build(b: *std.build.Builder) void {
 
     const test_random = b.addTest("src/task/random.zig");
     const test_findmax = b.addTest("src/task/findmax.zig");
+    const test_sortarr = b.addTest("src/task/sortarr.zig");
 
     const test_step = b.step("test", "Run unit tests");
     test_step.dependOn(&test_random.step);
     test_step.dependOn(&test_findmax.step);
+    test_step.dependOn(&test_sortarr.step);
 }
