@@ -8,6 +8,7 @@ pub const TaskId = enum {
     random,
     findmax,
     sortarr,
+    sortll,
 
     pub fn read() !TaskId {
         const line = try stdin.readUntilDelimiter(buf[0..], '\n');
@@ -20,6 +21,7 @@ pub const TaskId = enum {
                     else => error.ReadTaskIdError,
                 };
             },
+            '2' => TaskId.sortll,
             else => error.ReadTaskIdError
         };
     }

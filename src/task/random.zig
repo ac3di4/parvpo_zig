@@ -1,6 +1,7 @@
 const std = @import("std");
 const readInt = @import("read").readInt;
 const log = std.log.debug;
+const LList = @import("llist.zig").LList;
 
 /// LCG constants
 const m: u64 = 2147483648;
@@ -22,6 +23,30 @@ pub fn randSlice(allocator: std.mem.Allocator, seed: u32, n: usize) ![]u32 {
     var seed_ = seed;
     lgc(&seed_, data);
     return data;
+}
+
+/// Generate random linked list (for other tasks)
+pub fn randLL(allocator: std.mem.Allocator, seed: u32, n: usize) !*LList {
+    var seed_ = seed;
+    var list = try LList.init(allocator);
+    
+    // REALLY BAD DECISION (running out of time)
+    var buf = try allocator.alloc(u32, 1);
+
+    buf[0] = list.item;
+    lgc(&seed_, buf);
+    list.item = buf[0];
+    
+    var i: usize = 1;
+    var last: *LList = list;
+    while (i < n) : (i += 1) {
+        last = try last.chain(allocator);
+        buf[0] = last.item;
+        lgc(&seed_, buf);
+        last.item = buf[0];
+    }
+
+    return list;
 }
 
 /// Program interface for LCG

@@ -6,6 +6,7 @@ const log = std.log.debug;
 const random = @import("task/random.zig");
 const findmax = @import("task/findmax.zig");
 const sortarr = @import("task/sortarr.zig");
+const sortll = @import("task/sortll.zig");
 
 pub fn main() !void {
     var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
@@ -22,5 +23,6 @@ pub fn main() !void {
         .random => random.run(allocator, out),
         .findmax => findmax.run(allocator, out),
         .sortarr => sortarr.run(allocator, out),
+        .sortll => sortll.run(allocator, out),
     };
 }
