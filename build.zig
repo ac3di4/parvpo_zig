@@ -1,6 +1,11 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
+    const version = comptime try std.SemanticVersion.parse("0.9.1");
+    const compatible = comptime @import("builtin").zig_version.order(version) == .eq;
+    if (!compatible)
+        @compileError("Supported only zig 0.9.1 version");
+
     const debug = b.addExecutable("debug", "src/main.zig");
     debug.setOutputDir("build");
     debug.addPackage(.{
