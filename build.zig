@@ -12,6 +12,10 @@ pub fn build(b: *std.build.Builder) void {
         .name = "read",
         .path = .{ .path = "src/read.zig" },
     });
+    debug.addPackage(.{
+        .name = "write",
+        .path = .{ .path = "src/write.zig" },
+    });
 
     const debug_step = b.step("debug", "Compile debug build");
     debug_step.dependOn(&debug.step);
@@ -26,6 +30,10 @@ pub fn build(b: *std.build.Builder) void {
         .name = "read",
         .path = .{ .path = "src/read.zig" },
     });
+    linux.addPackage(.{
+        .name = "write",
+        .path = .{ .path = "src/write.zig" },
+    });
 
     const linux_step = b.step("linux", "Compile linux release build");
     linux_step.dependOn(&linux.step);
@@ -36,6 +44,10 @@ pub fn build(b: *std.build.Builder) void {
     windows.addPackage(.{
         .name = "read",
         .path = .{ .path = "src/read.zig" },
+    });
+    windows.addPackage(.{
+        .name = "write",
+        .path = .{ .path = "src/write.zig" },
     });
 
     const windows_step = b.step("windows", "Compile windows release build");

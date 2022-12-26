@@ -1,6 +1,7 @@
 const std = @import("std");
 const readInt = @import("read").readInt;
 const randSlice = @import("random.zig").randSlice;
+const printSlice = @import("write").printSlice;
 const log = std.log.debug;
 
 /// Actual merge sort
@@ -66,7 +67,7 @@ pub fn run(allocator: std.mem.Allocator, out: bool) !void {
 
     const stdout = std.io.getStdOut().writer();
     try stdout.print("time: {d} ms\n", .{estimated});
-    if (out) try stdout.print("{any}\n", .{slice});
+    if (out) try printSlice(slice);
 }
 
 test "sortarr" {
