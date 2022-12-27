@@ -44,46 +44,42 @@ pub fn LList(comptime T: type) type {
             return self;
         }
 
+        fn mergeSorted(right: *Self, left: *Self) *Self {
+            var head: *Self = undefined;
+
+            if (left.value < right.value) {
+                head = left;
+                head.next = if (left.next == null)
+                    right
+                else
+                    left.next.?.mergeSorted(right);
+            } else {
+                head = right;
+                head.next = if (right.next == null)
+                    left
+                else
+                    right.next.?.mergeSorted(left);
+            }
+
+            return head;
+        }
+
         /// Sort LList with merge sort
         /// Return new head link
         pub fn msort(self: *Self, n: usize) *Self {
             if (n == 1)
                 return self;
             
+            // Find middle
             const mid: usize = n / 2;
-            
             const node = self.nth(mid - 1);
-            // std.debug.print("here: {?}\n", .{node.next});
             var right = node.next.?;
             node.next = null;
 
-            var left = self.msort(mid);
+            var left: *Self = self.msort(mid);
             right = right.msort(n - mid);
-
-            const min = if (left.value < right.value) &left else &right;
-            var head = min.*;
-            // if min ended then we need to connect other and return
-            if (min.*.next == null) {
-                head.next = if (min == &left) right else left;
-                return head;
-            }
-            var last = min.*;
-            min.* = min.*.next.?;
-
-            // merge lists
-            while (left.next != null and right.next != null) : (last = last.next.?) {
-                if (left.value < right.value) {
-                    last.next = left;
-                    left = left.next.?;
-                } else {
-                    last.next = right;
-                    right = right.next.?;
-                }
-            }
-
-            // add remaining
-            last.next = if (left.value < right.value) left.chain(right) else right.chain(left);
-            return head;
+            
+            return mergeSorted(left, right);
         }
 
         /// Custom format printing for linked lists of u32
