@@ -1,64 +1,38 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const version = comptime try std.SemanticVersion.parse("0.9.1");
+    const version = comptime try std.SemanticVersion.parse("0.10.0");
     const compatible = comptime @import("builtin").zig_version.order(version) == .eq;
     if (!compatible)
-        @compileError("Supported only zig 0.9.1 version");
+        @compileError("Supported only zig 0.10.0 version");
 
-    const debug = b.addExecutable("debug", "src/main.zig");
-    debug.setOutputDir("build");
-    debug.addPackage(.{
-        .name = "read",
-        .path = .{ .path = "src/read.zig" },
-    });
-    debug.addPackage(.{
-        .name = "write",
-        .path = .{ .path = "src/write.zig" },
-    });
+    const exe_name = if (b.option([]const u8, "exe", "Executable name")) |name| name else "main";
 
-    const debug_step = b.step("debug", "Compile debug build");
-    debug_step.dependOn(&debug.step);
+    const exe = b.addExecutable(exe_name, "src/main.zig");
+    exe.setTarget(b.standardTargetOptions(.{}));
+    exe.setBuildMode(b.standardReleaseOptions());
+    exe.addPackagePath("reader", "lib/reader.zig");
+    exe.addPackagePath("random", "lib/random.zig");
+    exe.addPackagePath("llist", "lib/llist.zig");
+    exe.strip = b.option(bool, "strip", "Strip executable");
+    exe.single_threaded = true;
+    exe.install();
 
-    const run_step = b.step("run", "Run debug build");
-    run_step.dependOn(&debug.run().step);
+    const run_cmd = exe.run();
+    run_cmd.step.dependOn(b.getInstallStep());
+    if (b.args) |args| {
+        run_cmd.addArgs(args);
+    }
 
-    const linux = b.addExecutable("linux", "src/main.zig");
-    linux.setBuildMode(.ReleaseFast);
-    linux.setOutputDir("build");
-    linux.addPackage(.{
-        .name = "read",
-        .path = .{ .path = "src/read.zig" },
-    });
-    linux.addPackage(.{
-        .name = "write",
-        .path = .{ .path = "src/write.zig" },
-    });
-
-    const linux_step = b.step("linux", "Compile linux release build");
-    linux_step.dependOn(&linux.step);
-
-    const windows = b.addExecutable("windows.exe", "src/main.zig");
-    windows.setBuildMode(.ReleaseFast);
-    windows.setOutputDir("build");
-    windows.addPackage(.{
-        .name = "read",
-        .path = .{ .path = "src/read.zig" },
-    });
-    windows.addPackage(.{
-        .name = "write",
-        .path = .{ .path = "src/write.zig" },
-    });
-
-    const windows_step = b.step("windows", "Compile windows release build");
-    windows_step.dependOn(&windows.step);
-
-    const test_random = b.addTest("src/task/random.zig");
-    const test_findmax = b.addTest("src/task/findmax.zig");
-    const test_sortarr = b.addTest("src/task/sortarr.zig");
+    const run_step = b.step("run", "Run the app");
+    run_step.dependOn(&run_cmd.step);
 
     const test_step = b.step("test", "Run unit tests");
-    test_step.dependOn(&test_random.step);
-    test_step.dependOn(&test_findmax.step);
-    test_step.dependOn(&test_sortarr.step);
+    test_step.dependOn(&b.addTest("lib/random.zig").step);
+    test_step.dependOn(&b.addTest("lib/llist.zig").step);
+    test_step.dependOn(&b.addTest("src/findmax.zig").step);
+    
+    const sortll_test = b.addTest("src/sortll.zig");
+    sortll_test.addPackagePath("llist", "lib/llist.zig");
+    test_step.dependOn(&sortll_test.step);
 }

@@ -1,28 +1,20 @@
 const std = @import("std");
-const readBool = @import("read").readBool;
-const TaskId = @import("read").TaskId;
 const log = std.log.debug;
 
-const random = @import("task/random.zig");
-const findmax = @import("task/findmax.zig");
-const sortarr = @import("task/sortarr.zig");
-const sortll = @import("task/sortll.zig");
+const reader = @import("reader");
+const TaskId = @import("common.zig").TaskId;
 
 pub fn main() !void {
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-    const allocator = arena.allocator();
+    const allocator = std.heap.page_allocator;
+    reader.init();
 
     log("enter task id", .{});
-    const tid = try TaskId.read();
+    const tid = try reader.read(TaskId);
+    _ = try reader.stdin.readByte();
 
     log("enter output flag", .{});
-    const out = try readBool();
+    const out = try reader.read(bool);
+    _ = try reader.stdin.readByte();
 
-    try switch (tid) {
-        .random => random.run(allocator, out),
-        .findmax => findmax.run(allocator, out),
-        .sortarr => sortarr.run(allocator, out),
-        .sortll => sortll.run(allocator, out),
-    };
+    try tid.eval(allocator, out);
 }

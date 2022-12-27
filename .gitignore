@@ -1,3 +1,4 @@
 .code
 zig-cache/
-build/
+zig-out/
+bin/
