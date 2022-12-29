@@ -1,47 +1,114 @@
 const std = @import("std");
 const log = std.log.debug;
 
-const read = @import("reader").read;
-const random = @import("random");
-const LList = @import("llist").LList;
+const random = @import("random.zig");
+const readUInt = @import("common.zig").readUInt;
 
-/// Program interface for sorting linked list
-/// Read array size and generate it from seed
-/// Then sort out linked list
+const Node = struct {
+    value: u32,
+    next: ?*Node,
+
+    pub fn rand(allocator: std.mem.Allocator, n: usize) !*Node {
+        if (n == 0)
+            return error.ZeroLList;
+
+        const head = try allocator.create(Node);
+        head.value = random.rand();
+
+        var tail = head;
+        var i: usize = 1;
+
+        while (i < n) : (i += 1) {
+            tail.next = try allocator.create(Node);
+            tail = tail.next.?;
+            tail.value = random.rand();
+        }
+
+        tail.next = null;
+        return head;
+    }
+
+    /// Custom format printing
+    pub fn format(self: Node, comptime _: []const u8, _: std.fmt.FormatOptions, writer: anytype) @TypeOf(writer).Error!void {
+        try writer.print("{d}", .{self.value});
+        var tail = self.next;
+        while (tail) |node| {
+            try writer.print(" {d}", .{node.value});
+            tail = node.next;
+        }
+    }
+
+    pub fn deinit(self: *Node, allocator: std.mem.Allocator) void {
+        var tail: ?*Node = self;
+        while (tail) |node| {
+            tail = node.next;
+            allocator.destroy(node);
+        }
+    }
+};
+
+pub fn msort(list: *Node, n: usize) *Node {
+    if (n == 1) return list;
+
+    // find middle
+    const mid: usize = n / 2;
+    var premid: ?*Node = list;
+    var i: usize = 1;
+    
+    while (i < mid) : (i += 1) {
+        premid = premid.?.next;
+    }
+    
+    // split in the middle
+    var right = premid.?.next;
+    premid.?.next = null;
+    
+    // call msort on halves
+    var left: ?*Node = msort(list, mid);
+    right = msort(right.?, n - mid);
+
+    // choose head element
+    var head = left.?;
+    if (left.?.value < right.?.value)
+        left = left.?.next
+    else {
+        head = right.?;
+        right = right.?.next;
+    }
+    var tail = head;
+
+    // drain elements
+    while (left != null and right != null) : (tail = tail.next.? ) {
+        if (left.?.value < right.?.value) {
+            tail.next = left;
+            left = left.?.next;
+        } else {
+            tail.next = right;
+            right = right.?.next;
+        }
+    }
+
+    if (left) |_| tail.next = left;
+    if (right) |_| tail.next = right;
+
+    return head;
+}
+
 pub fn run(allocator: std.mem.Allocator, out: bool) !void {
     log("enter n", .{});
-    const n = try read(usize);
+    const n = try readUInt(usize);
 
     log("enter seed", .{});
-    random.seed = try read(u32);
+    random.seed = try readUInt(u32);
 
-    var llist = try random.randLL(allocator, n);
-    defer llist.deinit(allocator);
+    var list = try Node.rand(allocator, n);
+    defer list.deinit(allocator);
 
     var timer = try std.time.Timer.start();
-    llist = llist.msort(n);
+    list = msort(list, n);
     const estimated = timer.read() / std.time.ns_per_ms;
 
     const stdout = std.io.getStdOut().writer();
     try stdout.print("time: {d} ms\n", .{estimated});
-    if (out) try stdout.print("{}\n", .{llist});
-}
-
-test "sortll" {
-    var data_ = [_]u32{ 1, 8, 3, 5, 1 };
-    var data: []u32 = data_[0..];
-
-    const allocator = std.testing.allocator;
-    var llist = try LList(u32).fromSlice(allocator, data);
-    defer llist.deinit(allocator);
-
-    llist = llist.msort(data.len);
-
-    var res = [_]u32{1, 1, 3, 5, 8};
-    const eq = std.testing.expectEqual;
-    var p: ?*LList(u32) = llist;
-    for (res) |item| {
-        try eq(item, p.?.value);
-        p = p.?.next;
-    }
+    if (out) try stdout.print("{}\n", .{list});
 }

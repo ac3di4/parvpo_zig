@@ -11,9 +11,6 @@ pub fn build(b: *std.build.Builder) void {
     const exe = b.addExecutable(exe_name, "src/main.zig");
     exe.setTarget(b.standardTargetOptions(.{}));
     exe.setBuildMode(b.standardReleaseOptions());
-    exe.addPackagePath("reader", "lib/reader.zig");
-    exe.addPackagePath("random", "lib/random.zig");
-    exe.addPackagePath("llist", "lib/llist.zig");
     exe.strip = b.option(bool, "strip", "Strip executable");
     exe.single_threaded = true;
     exe.install();

@@ -1,5 +1,27 @@
 const std = @import("std");
-const reader = @import("reader");
+
+pub fn readUInt(comptime T: type) !T {
+    if (@typeInfo(T) != .Int or @typeInfo(T).Int.signedness == .signed)
+        @compileError("readUint called with '" ++ @typeName(T) ++ "' instead of UInt type");
+    
+    const stdin = std.io.getStdIn().reader();
+    var buf: [1024]u8 = undefined;
+    var i: usize = 0;
+    
+    while (i < buf.len) : (i += 1) {
+        if (stdin.readByte()) |byte| {
+            buf[i] = byte;
+            if (byte < '0' or byte > '9')
+                return std.fmt.parseInt(T, buf[0..i], 10);
+        } else |err| {
+            if (i != 0)
+                return std.fmt.parseInt(T, buf[0..i], 10);
+            return err;
+        }
+    }
+    return error.IntTooBig;
+}
+
 
 /// Custom slice printing for task format
 pub fn printSlice(comptime T: type, slice: []const T) !void {
@@ -13,30 +35,3 @@ pub fn printSlice(comptime T: type, slice: []const T) !void {
     }
     try stdout.writeAll("\n");
 }
-
-/// Task invoking tool
-pub const TaskId = enum {
-    findmax,
-    sortarr,
-    sortll,
-
-    pub fn fromIO() !TaskId {
-        const id = try reader.stdin.readByte();
-        _ = try reader.stdin.readByte();
-        const subid = try reader.stdin.readByte();
-        
-        return switch (id) {
-            '1' => if (subid == '1') .findmax else .sortarr,
-            '2' => .sortll,
-            else => error.UnrecognizedTaskId,
-        };
-    }
-
-    pub fn eval(self: TaskId, allocator: std.mem.Allocator, out: bool) !void {
-        return switch (self) {
-            .findmax => @import("findmax.zig").run(allocator, out),
-            .sortarr => @import("sortarr.zig").run(allocator, out),
-            .sortll => @import("sortll.zig").run(allocator, out),
-        };
-    }
-};

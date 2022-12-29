@@ -1,37 +1,30 @@
 const std = @import("std");
 const log = std.log.debug;
 
-const read = @import("reader").read;
-const random = @import("random");
-const printSlice = @import("common.zig").printSlice;
+const random = @import("random.zig");
+const common = @import("common.zig");
 
-/// Program interface for sorting array
-/// Read array size and generate it from seed
-/// Then sort out array
 pub fn run(allocator: std.mem.Allocator, out: bool) !void {
     log("enter n", .{});
-    const n = try read(usize);
+    const n = try common.readUInt(usize);
 
     log("enter seed", .{});
-    random.seed = try read(u32);
+    random.seed = try common.readUInt(u32);
 
     const slice = try allocator.alloc(u32, n);
-    random.fillSlice(slice);
+    defer allocator.free(slice);
+    for (slice) |*item|
+        item.* = random.rand();
 
     var timer = try std.time.Timer.start();
-    try merge_sort(allocator, slice);
+    var tmp = try allocator.alloc(u32, slice.len);
+    msort(slice, tmp);
+    allocator.free(tmp); // free in measures included
     const estimated = timer.read() / std.time.ns_per_ms;
 
     const stdout = std.io.getStdOut().writer();
     try stdout.print("time: {d} ms\n", .{estimated});
-    if (out) try printSlice(u32, slice);
-}
-
-/// Merge sort interface
-pub fn merge_sort(allocator: std.mem.Allocator, data: []u32) !void {
-    var tmp = try allocator.alloc(u32, data.len);
-    std.mem.copy(u32, tmp, data);
-    msort(data, tmp);
+    if (out) try common.printSlice(u32, slice);
 }
 
 /// Actual merge sort
@@ -55,7 +48,7 @@ fn msort(data: []u32, tmp: []u32) void {
             j += 1;
         }
     }
-    
+
     for (data[i..mid]) |item| {
         tmp[k] = item;
         k += 1;
@@ -67,14 +60,4 @@ fn msort(data: []u32, tmp: []u32) void {
     }
 
     std.mem.copy(u32, data, tmp);
-}
-
-test "sortarr" {
-    var data_ = [_]u32{1, 8, 3, 5, 1};
-    const data: []u32 = data_[0..];
-
-    merge_sort(std.testing.allocator, data);
-
-    var res = [_]u32{1, 1, 3, 5, 8};
-    try std.testing.expectEqualSlices(res, data);
 }
