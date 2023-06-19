@@ -1,0 +1,41 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{header}[Package for easy and pretty header and russian lang support]
+
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+
+%Hyphenation rules
+\usepackage{hyphenat}
+\hyphenation{ма-те-ма-ти-ка вос-ста-нав-ли-вать}
+\usepackage[english, russian]{babel}
+
+\usepackage{geometry}
+\usepackage{indentfirst}
+
+\newgeometry{left=1.5 cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+
+\newcommand{\header}[2]{
+    \begin{titlepage}
+        \begin{center}
+        \vspace*{1cm}
+        
+        \Huge
+        \textbf{#1}
+        
+        \vspace{0.5cm}
+        \LARGE
+        ``#2''
+        
+        \vspace{1.5cm}
+        Выполнил студент группы Б20-505\\
+        \textbf{Сорочан Илья}
+        
+        \vfill
+        
+        \Large
+        Московский Инженерно-Физический Интститут\\
+        Москва 2023
+        
+        \end{center}
+    \end{titlepage}
+}

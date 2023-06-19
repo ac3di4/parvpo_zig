@@ -1,0 +1,26 @@
+\appendix
+
+\titleformat{\section}[display]
+  {\normalfont\Large\bfseries}
+  {\centering Приложение\ \thesection\\}
+  {0pt}{\Large\centering}
+\renewcommand{\thesection}{\Asbuk{section}}
+
+\section{Использованные программные коды}
+
+Программа для замера времени соглашений о вызовах:
+\lstinputlisting{src/callconv.zig}
+\vspace{0.5cm}
+
+Программа, иллюстрирующая \textit{const}:
+\lstinputlisting{src/const.zig}
+\vspace{0.5cm}
+
+Передача простых структур по ссылке и по значению: 
+\lstinputlisting{src/pointer_small.zig}
+\vspace{0.5cm}
+
+
+Передача больших структур по ссылке и по значению: 
+\lstinputlisting{src/pointer_big.zig}
+\vspace{0.5cm}

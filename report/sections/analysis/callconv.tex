@@ -1,0 +1,50 @@
+\subsection{Соглашения о вызовах функций}
+
+Возьмем следующую функцию в качестве примера:
+\begin{lstlisting}
+fn function(b: usize) usize {
+    return b + 1;
+}
+\end{lstlisting}
+
+Тогда главный цикл будет иметь следующий вид:
+\begin{lstlisting}
+var a: usize = 0;
+for (0 .. 1000000000) |b|
+    a = function(b);
+\end{lstlisting}
+
+Соглашение о вызове функции function можно задать в её объявлении следущим образом:
+\begin{lstlisting}
+fn function(b: usize) callconv(.C) usize {
+    return b + 1;
+}
+\end{lstlisting}
+
+Здесь используется ключевое слово \textit{callconv}, которому передается одна из констант \textit{std.builtin.CallingConvention}. Имя перечисления можно опустить (особенность языка). Среди доступных перечислений имеются (\textbf{не все элементы}):
+\begin{itemize}
+    \item \textit{C} -- совместима с Си, она же \textit{cdecl};
+    \item \textit{Naked} -- функция без пролога и эпилога. Не может вызываться из самого Zig, но может быть полезна при интегрировании в ассемблер;
+    \item \textit{Inline} -- функция встраивается в место вызова;
+    \item \textit{Stdcall}, \textit{Fastcall}, \textit{Win64} и многие другие
+\end{itemize}
+
+При оптимизированной сборке данная программа работает за 0 милисекунд (наносекунды). При этом функция main отсутствует. Полагаю это связано с тем, что компилятор Zig старается исполнить как можно больше кода во время компиляции. Поэтому для проверки производительности вызовов будет использоваться отладочная сборка.
+
+Соглашений о вызовах очень много, тем более, что некоторые из них поддерживают только определенную архитектуру процессора (\textit{APCS}, \textit{Kernel} и тд). Вот среднее время (ms) за 10 запусков для некоторых из них:
+\begin{itemize}
+    \item \textit{Undefined} (не указано) -- 2820;
+    \item \textit{C} -- 2820;
+    \item \textit{Win64} -- 2820;
+    \item \textit{SysV} -- 2819;
+    \item \textit{Inline} -- 2058;
+\end{itemize}
+
+В тестах не участвовали \textit{Stdcall} и \textit{Fastcall}, так как они не поддерживают разрядность \textit{x86\_64}. Для того что бы получить 32-битный исполняемый файл, необходимо указать флаг \textit{-target x86-linux-gnu}. С помощью него можно указывать цель компиляции (в том числе и кросс-компилировать). В моем случае OS linux и abi GNU. Аналогично проведем 10 запусков и подсчитаем среднее время (ms):
+\begin{itemize}
+    \item \textit{Undefined} (не указана) -- 2818;
+    \item \textit{C} -- 2817;
+    \item \textit{Stdcall} -- 2995;
+    \item \textit{Fastcall} -- 2991;
+    \item \textit{Inline} -- 1950;
+\end{itemize}

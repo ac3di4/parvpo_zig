@@ -1,0 +1,37 @@
+\subsection{Ключевое слово \textit{const}}
+
+В языке программирования Zig ключевое слово конст используется для объявления новых переменных следующим образом:
+\begin{lstlisting}
+const a = 0;
+const b: i32 = 1;
+\end{lstlisting}
+
+Тип константы можно не задавать, однако тип зачастую требуется при инициализации новой изменяемой переменной:
+\begin{lstlisting}
+var a = 0;      // ERROR
+var b: i32 = 1; // ОК
+\end{lstlisting}
+
+При этом, если изменяемая переменная не изменяется, то компилятор так же выдаст ошибку:
+\begin{lstlisting}
+var a: usize = 0;
+var l = 1000000000; // error: variable must be const or comptime
+for (0 .. l) |b|
+    a = function(b);
+std.debug.print("{}\n", .{a});
+\end{lstlisting}
+
+Однако, стоит отметить, что это требование можно обойти с помощью вызова функции. Например:
+\begin{lstlisting}
+fn num() callconv(.Inline) usize {
+    return 1000000000;
+}
+
+// some code
+
+var l = num(); // OK
+comptime l = num(); // OK
+var d = std.math.pow(usize, 10, 9); // OK
+\end{lstlisting}
+
+Все же я полагаю это временной недоработкой языка и так как согласно идеологии и инструметам Zig как можно больше вычислений следует оставлять компилятору, то полагаю, что сравнивать исполнение с \textit{const} и без него не имеет смысла. Потому что \textit{const} следует использовать по возможности всегда.

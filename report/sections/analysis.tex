@@ -1,0 +1,21 @@
+\section{Исследование языка}
+
+Параметры системы:\\
+OS: \textit{Manjaro Linux x86\_64}\\
+CPU: \textit{6-core AMD Ryzen 5 4500U}\\
+Версия компилятора: \textit{0.11.0-dev.3704+729a051e9} (новейшая на данный момент)\\
+
+Компиляция файла \textit{main.zig} без оптимизации:\\
+\begin{lstlisting}
+zig build-exe main.zig
+\end{lstlisting}
+
+С оптимизацией:\\
+\begin{lstlisting}
+zig build-exe -O ReleaseFast -fstrip main.zig
+\end{lstlisting}
+
+\input{sections/analysis/callconv.tex}
+\input{sections/analysis/const.tex}
+\input{sections/analysis/pointer.tex}
+\input{sections/analysis/vector.tex}

@@ -1,4 +1,12 @@
+// source code
 .code
 zig-cache/
 zig-out/
 bin/
+
+// Latex
+report/**/*.aux
+report/**/*.dvi
+report/**/*.log
+report/**/*.synctex
+report/**/*.o
